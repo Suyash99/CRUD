@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Student = require("./schema");
 
+//CRUD Operations
 exports.createMongo = (req, res) => {
   const student = new Student(req.body);
 
@@ -47,6 +48,12 @@ exports.readOneMongo = (req, res) => {
         error: err.message,
       });
     } else {
+      if (found == null) {
+        return res.status(400).json({
+          data: null,
+          error: req.query.id + " _id doesnt exist in DB!",
+        });
+      }
       found._id = undefined;
       found.createdAt = undefined;
       found.updatedAt = undefined;
@@ -130,4 +137,29 @@ exports.idChecker = async (req, res, next) => {
     }
   });
   flag ? next() : "";
+};
+
+exports.existsInDBCheck = async (req, res, next) => {
+  if (req.query.id != undefined || req.query.id != null || req.query.id != "") {
+    Student.findById(req.query.id).exec((err, found) => {
+      if (err) {
+        res.status(400).json({
+          data: null,
+          error: err.message,
+        });
+      } else if (found == null) {
+        res.status(400).json({
+          data: null,
+          error: req.query.id + " id not found in DB!",
+        });
+      } else {
+        next();
+      }
+    });
+  } else {
+    res.status(400).json({
+      data: null,
+      error: "Query parameter id is not provided properly!",
+    });
+  }
 };

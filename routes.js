@@ -7,12 +7,13 @@ const {
   updateMongo,
   deleteMongo,
   idChecker,
+  existsInDBCheck,
 } = require("./mongoOperations");
 
 app.post("/create", idChecker, createMongo);
 app.get("/fetchAll", findAlldMongo);
-app.get("/read", readOneMongo);
-app.put("/update", updateMongo);
-app.delete("/delete", deleteMongo);
+app.get("/read", existsInDBCheck, readOneMongo);
+app.put("/update", existsInDBCheck, updateMongo);
+app.delete("/delete", existsInDBCheck, deleteMongo);
 
 module.exports = app;
