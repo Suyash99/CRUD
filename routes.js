@@ -6,12 +6,12 @@ const {
   readOneMongo,
   updateMongo,
   deleteMongo,
-  idChecker,
   existsInDBCheck,
 } = require("./mongoOperations");
 
-app.post("/create", idChecker, createMongo);
+app.post("/create", createMongo);
 app.get("/fetchAll", findAlldMongo);
+app.get("/counterForId", findAlldMongo);
 app.get("/read", existsInDBCheck, readOneMongo);
 app.put("/update", existsInDBCheck, updateMongo);
 app.delete("/delete", existsInDBCheck, deleteMongo);

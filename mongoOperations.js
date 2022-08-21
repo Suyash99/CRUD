@@ -2,9 +2,26 @@ const mongoose = require("mongoose");
 const Student = require("./schema");
 
 //CRUD Operations
-exports.createMongo = (req, res) => {
-  const student = new Student(req.body);
+const counterService = async () => {
+  let dbEntry = await Student.find().sort({ _id: 1 }).limit(10)
 
+  return dbEntry?.[0]?.idNumber
+}
+
+const createMongo = async (req, res) => {
+  const student = new Student(req.body);
+  let idCounter = await counterService()
+
+  if (!idCounter) {
+    res.status(500).json({
+      data: null,
+      error: "Some error getting idNumber Counter-",
+      status: 500
+    })
+  }
+
+  //Assigning Counter to idNumber
+  req.body.idNumber = idCounter
   student.save((err, body) => {
     if (err) {
       res.status(400).json({
@@ -24,7 +41,7 @@ exports.createMongo = (req, res) => {
   });
 };
 
-exports.findAlldMongo = (req, res) => {
+const findAlldMongo = (req, res) => {
   Student.find().exec((err, data) => {
     if (err) {
       res.status(400).json({
@@ -40,8 +57,8 @@ exports.findAlldMongo = (req, res) => {
   });
 };
 
-exports.readOneMongo = (req, res) => {
-  Student.findById({ _id: req.query.id }).exec((err, found) => {
+const readOneMongo = (req, res) => {
+  Student.findOne({ idNumber: req.query.id }).exec((err, found) => {
     if (err) {
       res.status(400).json({
         data: null,
@@ -66,7 +83,7 @@ exports.readOneMongo = (req, res) => {
   });
 };
 
-exports.updateMongo = (req, res) => {
+const updateMongo = (req, res) => {
   if (req.query.id != undefined) {
     var _id = req.query.id;
   } else {
@@ -76,7 +93,7 @@ exports.updateMongo = (req, res) => {
     });
   }
   const updatedVal = req.body;
-  Student.updateOne({ _id: _id }, { $set: updatedVal }).exec(
+  Student.updateOne({ idNumber: _id }, { $set: updatedVal }).exec(
     (err, studentVal) => {
       if (err) {
         res.status(400).json({
@@ -97,7 +114,7 @@ exports.updateMongo = (req, res) => {
   );
 };
 
-exports.deleteMongo = (req, res) => {
+const deleteMongo = (req, res) => {
   if (req.query.id != undefined) {
     var _id = req.query.id;
   } else {
@@ -106,7 +123,7 @@ exports.deleteMongo = (req, res) => {
       error: "Query Parameter is not provided!",
     });
   }
-  Student.deleteOne({ _id: _id }).exec((err, deleteRes) => {
+  Student.deleteOne({ idNumber: _id }).exec((err, deleteRes) => {
     if (err) {
       res.status(400).json({
         data: null,
@@ -122,35 +139,20 @@ exports.deleteMongo = (req, res) => {
 };
 
 //MiddleWare
-exports.idChecker = async (req, res, next) => {
-  let flag = false;
-  Student.findOne({ idNumber: req.body.idNumber }).exec((err, idFound) => {
-    if (idFound) {
-      flag = true;
-      return res.status(400).json({
-        data: null,
-        error:
-          "ID Number " +
-          req.body.idNumber +
-          " is already associated with another student!",
-      });
-    }
-  });
-  flag ? next() : "";
-};
-
-exports.existsInDBCheck = async (req, res, next) => {
-  if (req.query.id != undefined || req.query.id != null || req.query.id != "") {
+const existsInDBCheck = async (req, res, next) => {
+  if (req.query.id) {
     Student.findById(req.query.id).exec((err, found) => {
       if (err) {
         res.status(400).json({
           data: null,
-          error: err.message,
+          error: "Internal Server error- " + err.message,
+          status: 400
         });
-      } else if (found == null) {
+      } else if (!found) {
         res.status(400).json({
           data: null,
           error: req.query.id + " id not found in DB!",
+          status: 400
         });
       } else {
         next();
@@ -163,3 +165,12 @@ exports.existsInDBCheck = async (req, res, next) => {
     });
   }
 };
+
+module.exports = {
+  existsInDBCheck: existsInDBCheck,
+  createMongo: createMongo,
+  findAlldMongo: findAlldMongo,
+  readOneMongo: readOneMongo,
+  updateMongo: updateMongo,
+  deleteMongo: deleteMongo
+}

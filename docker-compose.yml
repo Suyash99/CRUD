@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  myMongo:
+    image: "mongo"
+
+  myNode:
+    build: .
+    ports:
+      - "8000:8000"
