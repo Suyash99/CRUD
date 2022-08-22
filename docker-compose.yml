@@ -1,10 +1,10 @@
 version: "3"
 
 services:
-  myMongo:
+  mymongo:
     image: "mongo"
 
-  myNode:
+  nodeapp:
     build: .
     ports:
       - "8000:8000"

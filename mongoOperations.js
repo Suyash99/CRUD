@@ -3,9 +3,9 @@ const Student = require("./schema");
 
 //CRUD Operations
 const counterService = async () => {
-  let dbEntry = await Student.find().sort({ _id: 1 }).limit(10)
-
-  return dbEntry?.[0]?.idNumber
+  let dbEntry = await Student.find({}).sort({ _id: 1 }).limit(10)
+  console.log(dbEntry)
+  return typeof dbEntry == "object" && dbEntry.length == 0 ? 1 : dbEntry?.[0]?.idNumber
 }
 
 const createMongo = async (req, res) => {
@@ -13,7 +13,7 @@ const createMongo = async (req, res) => {
   let idCounter = await counterService()
 
   if (!idCounter) {
-    res.status(500).json({
+    return res.status(500).json({
       data: null,
       error: "Some error getting idNumber Counter-",
       status: 500
