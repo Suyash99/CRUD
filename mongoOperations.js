@@ -6,12 +6,12 @@ const counterService = async () => {
 
   return typeof dbEntry == "object" && dbEntry.length == 0
     ? 1
-    : dbEntry?.[0]?.idNumber;
+    : dbEntry[0].idNumber;
 };
 
 const createMongo = async (req, res) => {
   let idCounter = await counterService();
-
+  
   if (!idCounter) {
     return res.status(500).json({
       data: null,

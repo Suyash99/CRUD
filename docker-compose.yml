@@ -1,10 +1,22 @@
 version: "3"
 
 services:
-  mymongo:
+  mongo:
     image: "mongo"
+    restart: always
+    container_name: CRUD-DB
+    ports:
+      - "27019:27017"
 
-  nodeapp:
-    build: .
+  server:
+    container_name: CRUD-server
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - .env
     ports:
       - "8000:8000"
+    depends_on:
+      - mongo
+
